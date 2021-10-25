@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
     for (rp = res;rp != NULL;rp = rp->ai_next) {
-        if (listenfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol) == -1) {
+        if ((listenfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)) == -1) {
             continue;
         }
         if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
