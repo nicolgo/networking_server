@@ -1,6 +1,6 @@
 TARGETS=tcp_client tcp_server \
 	graceclient graceserver addressused \
-	select_test
+	select_test poll_server
 
 CC=gcc
 CCOPTS=-Wall -Wextra
