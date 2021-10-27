@@ -1,18 +1,24 @@
 TARGETS=tcp_client tcp_server \
 	graceclient graceserver addressused \
 	select_test poll_server
-
+DEP_TARGETS=test
+LIB=lib_gutil.c
 CC=gcc
-CCOPTS=-Wall -Wextra
+CCOPTS=-Wall -Wextra -g
 
 .PHONY: all clean pristine
 
-all: $(TARGETS)
+all: $(TARGETS) $(DEP_TARGETS)
 
-clean:
-	rm -f $(TARGETS)
 
 pristine: clean
 
-%: %.c
+$(TARGETS):%:%.c
 	$(CC) $(CCOPTS) -o $@ $<
+
+$(DEP_TARGETS):%:%.c 
+	$(CC) $(CCOPTS) $< $(LIB) -o $@
+
+clean:
+	rm -f $(TARGETS)
+	rm -f $(DEP_TARGETS)
