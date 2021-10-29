@@ -1,7 +1,7 @@
 TARGETS=tcp_client tcp_server \
 	graceclient graceserver addressused \
 	select_test poll_server
-DEP_TARGETS=test
+DEP_TARGETS=test nonblocking_client nonblocking_server
 LIB=lib_gutil.c
 CC=gcc
 CCOPTS=-Wall -Wextra -g
