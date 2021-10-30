@@ -4,56 +4,76 @@
 #include <string.h>
 #include <unistd.h>
 
-#define PORT "12345"
-#define BACKLOG 10
+int get_server_listen_fd(char* host_or_ip, char* port);
+void chat_with_client(int accpet_fd);
+
 
 int main(int argc, char* argv[])
 {
-    int status;
-    int sfd;
     int new_sfd;
+    int listen_fd;
+    struct sockaddr_storage client_addr;
+    socklen_t addr_len = sizeof client_addr;
+
+    listen_fd = get_server_listen_fd(NULL, "21042");
+    if ((new_sfd = accept(listen_fd, (struct sockaddr*)&client_addr, &addr_len)) < 0) {
+        perror("failed to accept");
+        exit(EXIT_FAILURE);
+    }
+    chat_with_client(new_sfd);
+    close(new_sfd);
+    close(listen_fd);
+    exit(EXIT_SUCCESS);
+}
+
+int get_server_listen_fd(char* host_or_ip, char* port)
+{
+    int status;
+    int listen_fd;
     struct addrinfo hints;
     struct addrinfo* res, * rp;
-    char buffer[1024] = { 0 };
-    char* msg = "message from server";
-    struct sockaddr_storage their_addr;
-    int sin_size = sizeof their_addr;
-        
+
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-    if ((status = getaddrinfo(NULL, PORT, &hints, &res)) != 0) {
+    if (host_or_ip == NULL) {
+        hints.ai_flags = AI_PASSIVE;// if no ip, fill in localhost.
+    }
+    if ((status = getaddrinfo(host_or_ip, port, &hints, &res)) != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
         exit(EXIT_FAILURE);
     }
     for (rp = res;rp != NULL;rp = rp->ai_next) {
-        if ((sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)) == -1) {
+        if ((listen_fd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol)) == -1) {
             continue;
         }
-        if (bind(sfd, rp->ai_addr, rp->ai_addrlen) == 0) {
+        if (bind(listen_fd, rp->ai_addr, rp->ai_addrlen) == 0) {
             break;
         }
-        close(sfd);
+        close(listen_fd);
     }
     freeaddrinfo(res);
     if (rp == NULL) {
-        fprintf(stderr, "Could not bind\n");
+        perror("failed to bind\n");
         exit(EXIT_FAILURE);
     }
-    if (listen(sfd, BACKLOG) == -1) {
-        fprintf(stderr, "Could not listen\n");
+    if (listen(listen_fd, 10) == -1) {
+        perror("failed to listen\n");
         exit(EXIT_FAILURE);
     }
 
-    if ((new_sfd = accept(sfd, (struct sockaddr *)&their_addr,&sin_size)) < 0) {
-        fprintf(stderr, "Could not accept");
-        exit(EXIT_FAILURE);
-    }
-    read(new_sfd, buffer, 1024);
-    printf("server read client message: %s\n", buffer);
-    send(new_sfd, msg, strlen(msg), 0);
-    printf("server sent message: %s\n",msg);
+    return listen_fd;
+}
 
-    exit(EXIT_SUCCESS);
+void chat_with_client(int accpet_fd)
+{
+    char buffer[1024] = { 0 };
+    char* msg = "I'm a tcp server, let's chat.";
+
+    read(accpet_fd, buffer, 1024);
+    printf("msg client sent: %s\n", buffer);
+    send(accpet_fd, msg, strlen(msg), 0);
+    printf("msg server sent: %s\n", msg);
+
+    return;
 }
