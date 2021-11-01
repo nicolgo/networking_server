@@ -6,8 +6,8 @@
 struct Buffer {
     int connect_fd;
     char buffer[MAX_LINE];
-    size_t write_index;
-    size_t read_index;
+    size_t write_index;//the current writeable position
+    size_t read_index;//the current readable position
     int readable;
 };
 
@@ -24,13 +24,71 @@ void free_Buffer(struct Buffer* buffer) {
     free(buffer);
 }
 
+char rot13_char(char c)
+{
+    if ((c >= 'a' && c <= 'm') || (c >= 'A') && (c <= 'M')) {
+        return c + 13;
+    }
+    else if ((c >= 'n' && c <= 'z') || (c >= 'N' && c <= 'Z')) {
+        return c - 13;
+    }
+    else {
+        return c;
+    }
+}
+// server read data from client, then write it to buffer,
+// finally mark it ready to be read.
 int on_socket_read(int fd, struct Buffer* buffer)
 {
+    char buf[1024];
+    int i;
+    ssize_t result;
+    while (1) {
+        result = recv(fd, buf, sizeof(buf), 0);
+        if (result < 0) {
+            break;
+        }
 
+        for (i = 0;i < result;i++) {
+            if (buffer->write_index < sizeof(buffer->buffer)) {
+                buffer->buffer[buffer->write_index++] = rot13_char(buf[i]);
+            }
+            if (buf[i] == '\n') {
+                buffer->readable = 1;//buffer is readable
+            }
+        }
+    }
+    if (result == 0) {
+        return 1;//EOF
+    }
+    else if (result < 0) {
+        if (errno == EAGAIN) {
+            return 0;
+        }
+        return -1;
+    }
+    return 0;
 }
-
+// server send data to client, finally mark cannot readable.
 int on_socket_write(int fd, struct Buffer* buffer) {
+    while (buffer->read_index < buffer->write_index) {
+        ssize_t result = send(fd, buffer->buffer + buffer->read_index, buffer->write_index - buffer->read_index, 0);
+        if (result < 0) {
+            if (errno == EAGAIN) {
+                return 0;
+            }
+            return -1;
+        }
+        buffer->read_index += result;
+    }
 
+    if (buffer->read_index == buffer->write_index) {
+        buffer->read_index = buffer->write_index = 0;
+    }
+    //the data in buffer is send out.
+    buffer->readable = 0;
+
+    return 0;
 }
 
 int main(int argc, char* argv[])
@@ -76,6 +134,8 @@ int main(int argc, char* argv[])
             struct sockaddr_storage cli_addr;
             socklen_t addr_len = sizeof(cli_addr);
             int new_fd;
+            printf("listening socket readable\n");
+            sleep(5);//very important.RST will make block accept.
             new_fd = accept(listen_fd, (struct sockaddr*)&cli_addr, &addr_len);
             if (new_fd < 0) {
                 report_error("fail to accept");

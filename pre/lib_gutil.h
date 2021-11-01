@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <fcntl.h>
+#include <errno.h>
 
 int tcp_client(char* address, char* port);
 int tcp_nonblocking_server(char* ser_port);
