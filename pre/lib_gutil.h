@@ -16,4 +16,5 @@ int tcp_listen_fd(char* host_or_ip, char* serv_port);
 void report_error(char* err_msg);
 char lib_rot13_char(char c);
 void *get_in_addr(struct sockaddr *sa);
+int get_accept_fd(int listen_fd);
 #endif

@@ -155,3 +155,14 @@ void *get_in_addr(struct sockaddr *sa)
     }
     return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
+
+int get_accept_fd(int listen_fd)
+{
+    struct sockaddr_storage cli_addr;
+    socklen_t addr_len = sizeof(cli_addr);
+    int fd;
+
+    fd = accept(listen_fd,(struct sockaddr*)&cli_addr,&addr_len);
+
+    return fd;
+}
