@@ -92,7 +92,7 @@ void report_error(char* err_msg)
 
 char lib_rot13_char(char c)
 {
-    if ((c >= 'a' && c <= 'm') || (c >= 'A') && (c <= 'M')) {
+    if ((c >= 'a' && c <= 'm') || (c >= 'A' && c <= 'M')) {
         return c + 13;
     }
     else if ((c >= 'n' && c <= 'z') || (c >= 'N' && c <= 'Z')) {
