@@ -11,8 +11,8 @@
 #include <errno.h>
 
 int tcp_client(char* address, char* port);
-int tcp_nonblocking_server(char* ser_port);
+int tcp_nonblocking_server(char* host_or_ip, char* ser_port);
 
 void report_error(char* err_msg);
-
+char lib_rot13_char(char c);
 #endif

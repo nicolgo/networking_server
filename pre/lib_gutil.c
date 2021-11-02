@@ -38,8 +38,7 @@ int tcp_client(char* address, char* port)
     return sockfd;
 }
 
-
-int tcp_nonblocking_server(char* ser_port)
+int tcp_nonblocking_server(char* host_or_ip, char* ser_port)
 {
     int listenfd;
     int status;
@@ -49,9 +48,11 @@ int tcp_nonblocking_server(char* ser_port)
     memset(&hints, 0, sizeof(hints));
     hints.ai_family = AF_UNSPEC;
     hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
+    if(host_or_ip == NULL){
+        hints.ai_flags = AI_PASSIVE;
+    }
 
-    if ((status = getaddrinfo(NULL, ser_port, &hints, &res) != 0)) {
+    if ((status = getaddrinfo(host_or_ip, ser_port, &hints, &res) != 0)) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(status));
         exit(EXIT_FAILURE);
     }
@@ -87,4 +88,17 @@ void report_error(char* err_msg)
 {
     perror(err_msg);
     exit(EXIT_FAILURE);
+}
+
+char lib_rot13_char(char c)
+{
+    if ((c >= 'a' && c <= 'm') || (c >= 'A') && (c <= 'M')) {
+        return c + 13;
+    }
+    else if ((c >= 'n' && c <= 'z') || (c >= 'N' && c <= 'Z')) {
+        return c - 13;
+    }
+    else {
+        return c;
+    }
 }
