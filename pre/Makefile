@@ -3,16 +3,15 @@ TARGETS=tcp_client tcp_server \
 	select_test poll_server
 DEP_TARGETS=test nonblocking_client nonblocking_server epoll_server \
     fork_server
+PTH_OBJ=thread_test
+ALL_OBJS=$(TARGETS) $(DEP_TARGETS) $(PTH_OBJ)
 LIB=lib_gutil.c
 CC=gcc
 CCOPTS=-Wall -Wextra -g
 
-.PHONY: all clean pristine
+.PHONY: all clean
 
-all: $(TARGETS) $(DEP_TARGETS)
-
-
-pristine: clean
+all: $(ALL_OBJS)
 
 $(TARGETS):%:%.c
 	$(CC) $(CCOPTS) -o $@ $<
@@ -20,6 +19,8 @@ $(TARGETS):%:%.c
 $(DEP_TARGETS):%:%.c $(LIB)
 	$(CC) $(CCOPTS) $< $(LIB) -o $@
 
+$(PTH_OBJ):%:%.c
+	$(CC) $(CCOPTS) -pthread $< -o $@ 
+
 clean:
-	rm -f $(TARGETS)
-	rm -f $(DEP_TARGETS)
+	rm -f $(ALL_OBJS)
