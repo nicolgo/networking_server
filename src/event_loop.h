@@ -17,6 +17,7 @@ typedef struct event_loop_thread_struct {
 }event_loop_thread_struc;
 
 event_loop_struc* event_loop_init(char* thread_name);
+int event_loop_run(event_loop_struc *event_loop);
 
 int event_loop_thread_init(event_loop_thread_struc* event_loop_thread, int i);
 

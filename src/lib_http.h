@@ -32,10 +32,14 @@ typedef int (*request_callback_f)(http_request_struc* http_request,
     http_response_struct* http_response);
 
 typedef struct http_server_struc {
+    tcp_server_struc *tcp_server;
     request_callback_f request_callback;
 }http_server_struc;
 
 http_server_struc* http_server_init(event_loop_struc* event_loop,
     int port, request_callback_f request_callback, int thread_num);
+
+void http_server_start(http_server_struc *http_server);
+int parse_http_request(buffer_struc *request,http_request_struc *http_request);
 
 #endif

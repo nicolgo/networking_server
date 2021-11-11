@@ -9,5 +9,6 @@
 #include "lib_http.h"
 #include "lib_tcp_server.h"
 #include "thread_pool.h"
+#include "buffer.h"
 
 #endif
