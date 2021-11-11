@@ -2,7 +2,6 @@
 #define LIB_HTTP_H
 #include "lib_gutil.h"
 
-
 typedef struct http_request_header_struc {
     char* key;
     char* value;

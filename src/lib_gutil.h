@@ -7,5 +7,7 @@
 #include "event_dispatcher.h"
 #include "channel.h"
 #include "lib_http.h"
+#include "lib_tcp_server.h"
+#include "thread_pool.h"
 
 #endif
