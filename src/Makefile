@@ -1,15 +1,16 @@
-TARGETS=server
-ALL_OBJS=$(TARGETS) 
-LIB=lib_gutil.c event.c
+TARGET=my_app
+
+SRCS = $(wildcard *.c)
+
 CC=gcc
-CCOPTS=-Wall -Wextra -g
+CFLAGS=-Wall -Wextra -g
 
 .PHONY: all clean
 
-all: $(ALL_OBJS)
+all: $(TARGET)
 
-$(TARGETS):%:%.c
-	$(CC) $(CCOPTS) -o $@ $<
+$(TARGET):$(SRCS)
+	$(CC) $(CFLAGS) $(SRCS) -o $(TARGET)
 
 clean:
-	rm -f $(ALL_OBJS)
+	rm -f $(TARGET)

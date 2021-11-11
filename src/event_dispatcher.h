@@ -1,6 +1,5 @@
 #ifndef EVENT_DISPATCHER_H
 #define EVENT_DISPATCHER_H
-
 #include "lib_gutil.h"
 
 typedef struct event_dispatcher_struc {

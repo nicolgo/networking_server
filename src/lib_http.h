@@ -1,6 +1,5 @@
 #ifndef LIB_HTTP_H
 #define LIB_HTTP_H
-
 #include "lib_gutil.h"
 
 
