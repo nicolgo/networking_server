@@ -10,8 +10,10 @@ event_loop_struc* event_loop_init(char* thread_name) {
     }else{
         event_loop->thread_name = "main thread";
     }
+    event_loop->quit = 0;
+    event_loop->channel_map = mallco(sizeof(channel_map_struc));
+    map_init(event_loop->channel_map);
 
-    
     return event_loop;
 }
 

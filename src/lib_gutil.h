@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/epoll.h>
+#include <poll.h>
 #include "lib_log.h"
 #include "event_loop.h"
 #include "event_dispatcher.h"
