@@ -2,7 +2,16 @@
 
 event_loop_struc* event_loop_init(char* thread_name) {
     event_loop_struc* event_loop = malloc(sizeof(event_loop_struc));
+    pthread_mutex_init(&event_loop->mutex,NULL);
+    pthread_cond_init(&event_loop->cond,NULL);
 
+    if(thread_name != NULL){
+        event_loop->thread_name = thread_name;
+    }else{
+        event_loop->thread_name = "main thread";
+    }
+
+    
     return event_loop;
 }
 

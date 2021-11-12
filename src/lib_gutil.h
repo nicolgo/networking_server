@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+#include "lib_log.h"
 #include "event_loop.h"
 #include "event_dispatcher.h"
 #include "channel.h"

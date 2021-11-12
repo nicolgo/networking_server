@@ -13,5 +13,14 @@ typedef struct channel_struc {
     void* data;//the data for callback
 } channel_struc;
 
+/* The index of channel map is socket descriptor.*/
+typedef struct channel_map_struc{
+    void **channels;//the address of channel object
+    int n_channel;
+}channel_map_struc;
+
+int map_make_space(channel_map_struc *map,int socket_fd,int msize);
+void map_init(channel_map_struc *map);
+void map_free(channel_map_struc *map);
 
 #endif
