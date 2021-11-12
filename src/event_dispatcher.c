@@ -74,9 +74,49 @@ static int epoll_update(event_loop_struc* event_loop, channel_struc* channel)
 }
 static int epoll_dispatch(event_loop_struc* event_loop, struct timeval* time_val)
 {
-    
+    int i, n;
+    epoll_dispatcher_data_struc* epoll_dispatcher_data =
+        (epoll_dispatcher_data_struc*)event_loop->event_dispatcher_data;
+
+    n = epoll_wait(epoll_dispatcher_data->efd, epoll_dispatcher_data->events,
+        MAXEVENTS, -1);
+    net_msgx("epoll_wait wakeup, %s", event_loop->thread_name);
+
+    for (i = 0;i < n;i++) {
+        if ((epoll_dispatcher_data->events[i].events & EPOLLERR)
+            || (epoll_dispatcher_data->events[i].events & EPOLLHUP)) {
+            fprintf(stderr, "epoll error\n");
+            close(epoll_dispatcher_data->events[i].data.fd);
+            continue;
+        }
+
+        if(epoll_dispatcher_data->events[i].events & EPOLLIN){
+            net_msgx("get message channel fd=%d for read,%s",
+            epoll_dispatcher_data->events[i].data.fd,event_loop->thread_name);
+            
+        }
+
+        if(epoll_dispatcher_data->events[i].events & EPOLLIN){
+            net_msgx("get message channel fd=%d for write,%s",
+            epoll_dispatcher_data->events[i].data.fd,event_loop->thread_name);
+            
+        }
+    }
 }
 static void epoll_clear(event_loop_struc* event_loop)
 {
+    epoll_dispatcher_data_struc* epoll_dispatcher_data =
+        (epoll_dispatcher_data_struc*)event_loop->event_dispatcher_data;
+    if (epoll_dispatcher_data != NULL) {
+        if (epoll_dispatcher_data->events != NULL) {
+            free(epoll_dispatcher_data->events);
+        }
+        if (epoll_dispatcher_data->efd != 0) {
+            close(epoll_dispatcher_data->efd);
+        }
+        free(epoll_dispatcher_data);
+        event_loop->event_dispatcher_data = NULL;
+    }
 
+    return;
 }
