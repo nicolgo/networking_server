@@ -21,5 +21,6 @@
 #include "lib_http.h"
 #include "thread_pool.h"
 
+#define SERVER_PORT 21042
 
 #endif
