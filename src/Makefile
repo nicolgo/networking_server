@@ -4,6 +4,7 @@ SRCS = $(wildcard *.c)
 
 CC=gcc
 CFLAGS=-Wall -Wextra -g
+CFLAGS+=-I $(shell pwd)
 
 .PHONY: all clean
 

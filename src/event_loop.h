@@ -1,5 +1,7 @@
 #ifndef EVENT_LOOP_H
 #define EVENT_LOOP_H
+
+#include "event_dispatcher.h"
 #include "lib_gutil.h"
 #include <pthread.h>
 
@@ -9,12 +11,12 @@ extern const struct event_dispatcher_struc epoll_dispatcher;
 typedef struct channel_elem_struc {
     int type;// 1 add; 2 delete
     channel_struc* channel;
-    channel_elem_struc* next;
+    struct channel_elem_struc* next;
 }channel_elem_struc;
 
 typedef struct event_loop_struc {
     int quit;
-    event_dispatcher_struc* event_dispatcher;
+    struct event_dispatcher_struc* event_dispatcher;
     void* event_dispatcher_data;// void* type can be transfered easily.
     channel_map_struc* channel_map;
 
@@ -40,14 +42,21 @@ typedef struct event_loop_thread_struct {
 
 event_loop_struc* event_loop_init(char* thread_name);
 int event_loop_run(event_loop_struc* event_loop);
+void event_loop_wakeup(event_loop_struc* event_loop);
 
-int event_loop_process_channel_event(event_loop_struc* event_loop,
-    int fd, channel_struc* channel, int type);
+int channel_event_activate(event_loop_struc* event_loop, int fd, int res);
 int event_loop_add_channel_event(event_loop_struc* event_loop,
     int fd, channel_struc* channel);
 int event_loop_remove_channel_event(event_loop_struc* event_loop,
     int fd, channel_struc* channel);
 int event_loop_update_channel_event(event_loop_struc* event_loop,
+    int fd, channel_struc* channel);
+
+int event_loop_handle_pending_add(event_loop_struc* event_loop,
+    int fd, channel_struc* channel);
+int event_loop_handle_pending_remove(event_loop_struc* event_loop,
+    int fd, channel_struc* channel);
+int event_loop_handle_pending_update(event_loop_struc* event_loop,
     int fd, channel_struc* channel);
 
 int event_loop_thread_init(event_loop_thread_struc* event_loop_thread, int i);

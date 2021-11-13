@@ -1,6 +1,8 @@
 #ifndef CHANNEL_H
 #define CHANNEL_H
 
+#include "lib_gutil.h"
+
 #define EVENT_TIMEOUT    0x01
 /** Wait for a socket or FD to become readable */
 #define EVENT_READ        0x02
@@ -16,7 +18,7 @@ typedef int (*event_read_callback)(void* data);
 
 typedef struct channel_struc {
     int fd;
-    int events;
+    int events;//the event type
 
     event_write_callback eventWriteCallback;
     event_read_callback eventReadCallback;
