@@ -2,6 +2,8 @@
 #define LIB_HTTP_H
 #include "lib_gutil.h"
 
+/*********************** http request ***********************/
+
 typedef struct http_request_header_struc {
     char* key;
     char* value;
@@ -11,7 +13,7 @@ enum http_request_state {
     REQUEST_STATUS,    //wait parse status
     REQUEST_HEADERS,   //wait parse headers
     REQUEST_BODY,      //wait parse body
-    REQUEST_DONE       //parse finished
+    REQUEST_DONE,       //parse finished
 };
 
 typedef struct http_request_struc {
@@ -23,11 +25,21 @@ typedef struct http_request_struc {
     int request_headers_number;
 }http_request_struc;
 
+http_request_struc *http_request_init();
+void http_request_clear(http_request_struc* http_request);
+void http_request_reset(http_request_struc* http_request);
+void http_request_add_header(http_request_struc* http_request,char* key,char* value);
+char *http_request_get_header(http_request_struc* http_request,char* key);
+enum http_request_state http_request_current_state(http_request_struc* http_request);
+int http_request_close_connection(http_request_struc* http_request);
+
+/************************* http response ****************************/
 typedef struct http_response_struct {
 
 }http_response_struct;
 
 
+/************************* http server *******************************/
 typedef int (*request_callback_f)(http_request_struc* http_request,
     http_response_struct* http_response);
 

@@ -5,6 +5,7 @@ static void event_loop_channel_buffer_noblock(event_loop_struc* event_loop,
 static int event_loop_process_channel_event(event_loop_struc* event_loop,
     int fd, channel_struc* channel, int type);
 static int event_loop_handle_pending_channel(event_loop_struc* event_loop);
+static int handle_wakeup(void* data);
 
 event_loop_struc* event_loop_init(char* thread_name) {
     channel_struc* channel;
@@ -16,7 +17,7 @@ event_loop_struc* event_loop_init(char* thread_name) {
     event_loop->event_dispatcher = &epoll_dispatcher;
     event_loop->event_dispatcher_data =
         event_loop->event_dispatcher->init(event_loop);
-    event_loop->channel_map = mallco(sizeof(channel_map_struc));
+    event_loop->channel_map = malloc(sizeof(channel_map_struc));
     map_init(event_loop->channel_map);
 
     event_loop->is_handle_pending = 0;
@@ -35,11 +36,32 @@ event_loop_struc* event_loop_init(char* thread_name) {
         perror("socketpair set failed");
     }
 
-    channel = channel_new();
+    channel = channel_new(event_loop->socker_pair[1], EVENT_READ,
+        handle_wakeup, NULL, event_loop);
+    event_loop_add_channel_event(event_loop,event_loop->socker_pair[1],channel);
 
     return event_loop;
 }
 
+
+void event_loop_wakeup(event_loop_struc* event_loop)
+{
+    char one = 'a';
+    ssize_t n = write(event_loop->socker_pair[0],&one,sizeof(one));
+    if(n != sizeof(one)){
+        LOG_ERROR("wakeup event loop thread failed");
+    }
+}
+static int handle_wakeup(void* data)
+{
+    event_loop_struc* event_loop = (event_loop_struc*)data;
+    char one;
+    ssize_t n = read(event_loop->socker_pair[1], &one, sizeof(one));
+    if (n != sizeof(one)) {
+        LOG_ERROR("handle wakeup failed");
+    }
+    net_msgx("wakeup, %s", event_loop->thread_name);
+}
 static void event_loop_channel_buffer_noblock(event_loop_struc* event_loop,
     int fd, channel_struc* channel, int type)
 {
@@ -55,7 +77,6 @@ static void event_loop_channel_buffer_noblock(event_loop_struc* event_loop,
         event_loop->pending_tail = channel_elem;
     }
 }
-
 
 int event_loop_process_channel_event(event_loop_struc* event_loop,
     int fd, channel_struc* channel, int type)
@@ -75,17 +96,17 @@ int event_loop_process_channel_event(event_loop_struc* event_loop,
 int event_loop_add_channel_event(event_loop_struc* event_loop,
     int fd, channel_struc* channel)
 {
-    return event_loop_process_channel_event(event_loop,fd,channel,1);
+    return event_loop_process_channel_event(event_loop, fd, channel, 1);
 }
 int event_loop_remove_channel_event(event_loop_struc* event_loop,
     int fd, channel_struc* channel)
 {
-    return event_loop_process_channel_event(event_loop,fd,channel,2);
+    return event_loop_process_channel_event(event_loop, fd, channel, 2);
 }
 int event_loop_update_channel_event(event_loop_struc* event_loop,
     int fd, channel_struc* channel)
 {
-    return event_loop_process_channel_event(event_loop,fd,channel,3);
+    return event_loop_process_channel_event(event_loop, fd, channel, 3);
 }
 
 static int event_loop_handle_pending_channel(event_loop_struc* event_loop)
@@ -124,20 +145,20 @@ static int event_loop_handle_pending_channel(event_loop_struc* event_loop)
 int event_loop_handle_pending_add(event_loop_struc* event_loop,
     int fd, channel_struc* channel)
 {
-    channel_map_struc *channel_map = event_loop->channel_map;
-    if(fd < 0){
+    channel_map_struc* channel_map = event_loop->channel_map;
+    if (fd < 0) {
         return 0;
     }
-    if(fd >= channel_map->n_channel){
-        if(map_make_space(channel_map,fd,sizeof(channel_struc *)) == -1){
+    if (fd >= channel_map->n_channel) {
+        if (map_make_space(channel_map, fd, sizeof(channel_struc*)) == -1) {
             return -1;
         }
     }
 
-    if(channel_map->channels[fd] == NULL){
-        event_dispatcher_struc *event_dispatcher = event_loop->event_dispatcher;
+    if (channel_map->channels[fd] == NULL) {
+        event_dispatcher_struc* event_dispatcher = event_loop->event_dispatcher;
         channel_map->channels[fd] = channel;
-        event_dispatcher->add(event_loop,channel);
+        event_dispatcher->add(event_loop, channel);
         return 1;
     }
 
@@ -147,20 +168,21 @@ int event_loop_handle_pending_remove(event_loop_struc* event_loop,
     int fd, channel_struc* channel)
 {
     int return_value = 0;
-    channel_map_struc *channel_map = event_loop->channel_map;
+    channel_map_struc* channel_map = event_loop->channel_map;
     channel_struc* channel_tmp;
-    if(fd < 0){
+    if (fd < 0) {
         return 0;
     }
-    if(fd >= channel_map->n_channel){
+    if (fd >= channel_map->n_channel) {
         return -1;
     }
 
     channel_tmp = channel_map->channels[fd];
-    
-    if(event_loop->event_dispatcher->delete(event_loop,channel_tmp) == -1){
+
+    if (event_loop->event_dispatcher->delete(event_loop, channel_tmp) == -1) {
         return_value = -1;
-    }else{
+    }
+    else {
         return_value = 1;
     }
 
@@ -171,14 +193,14 @@ int event_loop_handle_pending_remove(event_loop_struc* event_loop,
 int event_loop_handle_pending_update(event_loop_struc* event_loop,
     int fd, channel_struc* channel)
 {
-    channel_map_struc *channel_map = event_loop->channel_map;
-    if(fd < 0){
+    channel_map_struc* channel_map = event_loop->channel_map;
+    if (fd < 0) {
         return 0;
     }
-    if(channel_map->channels[fd] == NULL){
+    if (channel_map->channels[fd] == NULL) {
         return -1;
     }
-    event_loop->event_dispatcher->update(event_loop,channel);
+    event_loop->event_dispatcher->update(event_loop, channel);
     return 0;
 }
 
@@ -186,7 +208,7 @@ int event_loop_thread_init(event_loop_thread_struc* event_loop_thread, int i)
 {
     char buf[16] = { 0 };
     pthread_mutex_init(&event_loop_thread->mutex, NULL);
-    pthread_cont_init(&event_loop_thread->cond, NULL);
+    pthread_cond_init(&event_loop_thread->cond, NULL);
 
     sprintf(buf, "Thread %d\0", i + 1);
     event_loop_thread->thread_name = buf;

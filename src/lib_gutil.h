@@ -10,6 +10,8 @@
 #include <sys/socket.h>
 #include <sys/epoll.h>
 #include <poll.h>
+#include <assert.h>
+#include <pthread.h>
 #include "lib_log.h"
 #include "channel.h"
 #include "event_dispatcher.h"

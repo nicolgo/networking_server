@@ -1,7 +1,7 @@
 #include "lib_gutil.h"
 #include <stdarg.h>  
 
-static void net_log(log_level_enum level, const char* msg)
+void net_log(log_level_enum level, const char* msg)
 {
     const char* log_level_str;
     switch (level)

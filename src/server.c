@@ -34,7 +34,11 @@ int main(int c, char* argv[])
     event_loop_run(event_loop);
 
     if(event_loop != NULL){
+        if(event_loop->channel_map != NULL){
+            free(event_loop->channel_map);
+        }
         free(event_loop);
+        event_loop = NULL;
     }
 
     exit(EXIT_SUCCESS);

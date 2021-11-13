@@ -8,7 +8,7 @@ typedef enum log_level_enum{
     LOG_LEVEL_ERROR
 }log_level_enum;
 
-
+void net_log(log_level_enum level, const char* msg);
 void net_logx(log_level_enum level,const char* errstr, const char *fmt,va_list ap);
 void net_msgx(const char *fmt,...);
 void net_debugx(const char *fmt,...);
