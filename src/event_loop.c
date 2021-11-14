@@ -45,6 +45,25 @@ event_loop_struc* event_loop_init(char* thread_name) {
 
 int event_loop_run(event_loop_struc* event_loop)
 {
+    assert(event_loop != NULL);
+    event_dispatcher_struc* dispatcher = event_loop->event_dispatcher;
+    if (event_loop->owner_thread_id != pthread_self()) {
+        perror("event loop thread is wrong");
+        exit(EXIT_FAILURE);
+    }
+    net_msgx("event loop thread is %s",event_loop->thread_name);
+
+    struct timeval time_val;
+    time_val.tv_sec = 1;
+
+    while(!event_loop->quit){
+        dispatcher->dispatch(event_loop,&time_val);
+
+        event_loop_handle_pending_channel(event_loop);
+    }
+
+    net_msgx("event loop thread %s end.",event_loop->thread_name);
+
     return 0;
 }
 

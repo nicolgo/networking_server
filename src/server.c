@@ -46,6 +46,7 @@ int test_http_server()
     buffer_append_string(buffer,data);
     http_request_struc *http_request = http_request_init();
     parse_http_request(buffer,http_request);
+    
 
     for(int i = 0;i <http_request->request_headers_number;i++){
         char* key = http_request->request_headers[i].key;
@@ -58,6 +59,9 @@ int test_http_server()
 
     buffer_struc *output = buffer_new();
     http_response_encode_buffer(http_response,output);
+
+    buffer_free(buffer);
+    buffer_free(output);
 
     return 0;
 }

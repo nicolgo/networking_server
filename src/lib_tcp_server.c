@@ -9,7 +9,7 @@ socket_acceptor_struct* socket_acceptor_init(int port) {
     int listenfd;
     int status;
     int yes = 1;
-    char port_str[5];
+    char port_str[6];
     struct addrinfo hints, * res, * rp;
     socket_acceptor_struct* acceptor = malloc(sizeof(socket_acceptor_struct));
 

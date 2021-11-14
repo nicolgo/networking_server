@@ -88,6 +88,7 @@ int buffer_append_string(buffer_struc* buffer, char* data)
     if(data != NULL){
         buffer_append(buffer,data,strlen(data));
     }
+    return 0;
 }
 int buffer_socket_read(buffer_struc* buffer, int fd)
 {
