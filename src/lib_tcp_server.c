@@ -56,6 +56,12 @@ socket_acceptor_struct* socket_acceptor_init(int port) {
 
 int handle_connection_closed(tcp_connection_struc* tcp_connection)
 {
+    event_loop_struc *event_loop = tcp_connection->event_loop;
+    channel_struc *channel = tcp_connection->channel;
+    event_loop_remove_channel_event(event_loop,channel->fd,channel);
+    if(tcp_connection->on_connection_closed != NULL){
+        tcp_connection->on_connection_closed(tcp_connection);
+    }
     return 0;
 }
 
@@ -83,10 +89,10 @@ int handle_write(void* data)
     event_loop_struc* event_loop = tcp_connection->event_loop;
     buffer_struc* output_buffer = tcp_connection->out_buffer;
     channel_struc* channel = tcp_connection->channel;
-    ssize_t nwrited = write(channel->fd, output_buffer->data + output_buffer->read_index,
+    ssize_t n_writed = write(channel->fd, output_buffer->data + output_buffer->read_index,
         buffer_readable_size(output_buffer));
-    if (nwrited > 0) {
-        output_buffer->read_index += nwrited;
+    if (n_writed > 0) {
+        output_buffer->read_index += n_writed;
         if (buffer_readable_size(output_buffer) == 0) {
             channel_write_event_disable(channel);
         }
@@ -133,9 +139,52 @@ tcp_connection_struc* tcp_connection_init(int connected_fd, event_loop_struc* ev
     return tcp_connection;
 }
 
-int tcp_connection_send_data(tcp_connection_struc* tcp_connection, void* data, int size);
-int tcp_connection_send_buffer(tcp_connection_struc* tcp_connection, buffer_struc* buffer);
-void tcp_connection_shutdown(tcp_connection_struc* tcp_connection);
+int tcp_connection_send_data(tcp_connection_struc* tcp_connection, void* data, int size)
+{
+    size_t n_writed = 0;
+    size_t n_left = size;
+    int fault = 0;
+    channel_struc* channel = tcp_connection->channel;
+    buffer_struc* output_buffer = tcp_connection->out_buffer;
+
+    if (!channel_write_event_is_enabled(channel)
+        && buffer_readable_size(output_buffer) == 0) {
+        n_writed = write(channel->fd, data, size);
+        if (n_writed >= 0) {
+            n_left = n_left - n_writed;
+        }
+        else {
+            n_writed = 0;
+            if (errno != EWOULDBLOCK) {
+                if (errno == EPIPE || errno == ECONNRESET) {
+                    fault = 1;
+                }
+            }
+        }
+    }
+
+    if (!fault && n_left > 0) {
+        buffer_append(output_buffer, data + n_writed, n_left);
+        if (!channel_write_event_is_enabled(channel)) {
+            channel_write_event_enable(channel);
+        }
+    }
+
+    return n_writed;
+}
+int tcp_connection_send_buffer(tcp_connection_struc* tcp_connection, buffer_struc* buffer)
+{
+    int size = buffer_readable_size(buffer);
+    int result = tcp_connection_send_data(tcp_connection, buffer->data + buffer->read_index, size);
+    buffer->read_index += size;
+    return result;
+}
+void tcp_connection_shutdown(tcp_connection_struc* tcp_connection)
+{
+    if (shutdown(tcp_connection->channel->fd, SHUT_WR) < 0) {
+        net_msgx("failed to shutdown tcp connect on socket=%d", tcp_connection->channel->fd);
+    }
+}
 
 
 /************************* TCP server *************************************/

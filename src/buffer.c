@@ -1,6 +1,8 @@
 #include "lib_gutil.h"
 #include <sys/uio.h>
 
+const char* CRLF = "\r\n";
+
 buffer_struc* buffer_new()
 {
     buffer_struc* buffer = malloc(sizeof(buffer_struc));
@@ -73,7 +75,20 @@ int buffer_append(buffer_struc* buffer, void* data, int size)
         buffer->write_index += size;
     }
 }
-int buffer_append_string(buffer_struc* buffer, char* data);
+
+int buffer_append_char(buffer_struc* buffer,char c)
+{
+    make_space(buffer,1);
+    buffer->data[buffer->write_index++] = c;
+    return 0;
+}
+
+int buffer_append_string(buffer_struc* buffer, char* data)
+{
+    if(data != NULL){
+        buffer_append(buffer,data,strlen(data));
+    }
+}
 int buffer_socket_read(buffer_struc* buffer, int fd)
 {
     char tmp_buffer[INIT_BUFFER_SIZE];
@@ -97,5 +112,13 @@ int buffer_socket_read(buffer_struc* buffer, int fd)
 
     return result;
 }
-char buffer_read_char(buffer_struc* buffer);
-char* buffer_find_CRLF(buffer_struc* buffer);
+char buffer_read_char(buffer_struc* buffer)
+{
+    return buffer->data[buffer->read_index++];
+}
+char* buffer_find_CRLF(buffer_struc* buffer)
+{
+    char* crlf = memmem(buffer->data + buffer->read_index,
+        buffer_readable_size(buffer), CRLF, 2);
+    return crlf;
+}
