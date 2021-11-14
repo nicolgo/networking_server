@@ -90,16 +90,16 @@ static int epoll_dispatch(event_loop_struc* event_loop, struct timeval* time_val
             continue;
         }
 
-        if(epoll_dispatcher_data->events[i].events & EPOLLIN){
+        if (epoll_dispatcher_data->events[i].events & EPOLLIN) {
             net_msgx("get message channel fd=%d for read,%s",
-            epoll_dispatcher_data->events[i].data.fd,event_loop->thread_name);
-            
+                epoll_dispatcher_data->events[i].data.fd, event_loop->thread_name);
+
         }
 
-        if(epoll_dispatcher_data->events[i].events & EPOLLIN){
+        if (epoll_dispatcher_data->events[i].events & EPOLLIN) {
             net_msgx("get message channel fd=%d for write,%s",
-            epoll_dispatcher_data->events[i].data.fd,event_loop->thread_name);
-            
+                epoll_dispatcher_data->events[i].data.fd, event_loop->thread_name);
+
         }
     }
 }

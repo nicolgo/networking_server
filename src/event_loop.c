@@ -38,7 +38,7 @@ event_loop_struc* event_loop_init(char* thread_name) {
 
     channel = channel_new(event_loop->socker_pair[1], EVENT_READ,
         handle_wakeup, NULL, event_loop);
-    event_loop_add_channel_event(event_loop,event_loop->socker_pair[1],channel);
+    event_loop_add_channel_event(event_loop, event_loop->socker_pair[1], channel);
 
     return event_loop;
 }
@@ -47,8 +47,8 @@ event_loop_struc* event_loop_init(char* thread_name) {
 void event_loop_wakeup(event_loop_struc* event_loop)
 {
     char one = 'a';
-    ssize_t n = write(event_loop->socker_pair[0],&one,sizeof(one));
-    if(n != sizeof(one)){
+    ssize_t n = write(event_loop->socker_pair[0], &one, sizeof(one));
+    if (n != sizeof(one)) {
         LOG_ERROR("wakeup event loop thread failed");
     }
 }

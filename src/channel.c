@@ -1,9 +1,9 @@
 #include "lib_gutil.h"
 
-channel_struc* channel_new(int fd, int events, event_read_callback_func event_read_callback,
+channel_struc* channel_init(int fd, int events, event_read_callback_func event_read_callback,
     event_write_callback_func event_write_callback, void* data)
 {
-    channel_struc *channel = malloc(sizeof(channel_struc));
+    channel_struc* channel = malloc(sizeof(channel_struc));
     channel->fd = fd;
     channel->events = events;
     channel->event_read_callback = event_read_callback;
@@ -21,13 +21,13 @@ int channel_write_event_enable(channel_struc* channel)
 {
     event_loop_struc* event_loop = (event_loop_struc*)channel->data;
     channel->events = channel->events | EVENT_WRITE;
-    event_loop_update_channel_event(event_loop,channel->fd,channel);
+    event_loop_update_channel_event(event_loop, channel->fd, channel);
 }
 int channel_write_event_disable(channel_struc* channel)
 {
     event_loop_struc* event_loop = (event_loop_struc*)channel->data;
     channel->events = channel->events | (~EVENT_WRITE);
-    event_loop_update_channel_event(event_loop,channel->fd,channel);
+    event_loop_update_channel_event(event_loop, channel->fd, channel);
 }
 
 int map_make_space(channel_map_struc* map, int socket_fd, int msize)

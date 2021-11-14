@@ -27,5 +27,8 @@ http_server_struc* http_server_init(event_loop_struc* event_loop,
 
 
 }
-void http_server_start(http_server_struc *http_server);
+void http_server_start(http_server_struc *http_server)
+{
+    tcp_server_start(http_server->tcp_server);
+}
 int parse_http_request(buffer_struc *request,http_request_struc *http_request);
