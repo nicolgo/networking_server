@@ -3,7 +3,7 @@ TARGET=my_app
 SRCS = $(wildcard *.c)
 
 CC=gcc
-CFLAGS=-Wall -Wextra -g
+CFLAGS=-Wall -Wextra -g -pthread
 CFLAGS+=-I $(shell pwd)
 
 .PHONY: all clean

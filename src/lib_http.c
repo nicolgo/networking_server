@@ -90,11 +90,25 @@ http_response_struc* http_response_init()
     http_response->body = NULL;
     http_response->status_code = UnKnown;
     http_response->status_message = NULL;
-    http_response->response_headers = malloc(sizeof(http_request_header_struc) * INIT_RESPONSE_HEADER_SIZE);
+    http_response->response_headers = malloc(sizeof(http_response_header_struc) * INIT_RESPONSE_HEADER_SIZE);
     http_response->response_headers_number = 0;
     http_response->keep_connected = 0;
 
     return http_response;
+}
+void http_response_free(http_response_struc* http_response)
+{
+    if (http_response != NULL) {
+        if (http_response->response_headers != NULL) {
+            for (int i = 0;i < http_response->response_headers_number;i++) {
+                free(http_response->response_headers[i].key);
+                free(http_response->response_headers[i].value);
+            }
+            free(http_response->response_headers);
+        }
+        free(http_response);
+    }
+    return;
 }
 void http_response_encode_buffer(http_response_struc* http_response,
     buffer_struc* output)

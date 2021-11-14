@@ -1,3 +1,4 @@
+#include <pthread.h>
 #include "lib_gutil.h"
 
 static void event_loop_channel_buffer_noblock(event_loop_struc* event_loop,
@@ -14,6 +15,7 @@ event_loop_struc* event_loop_init(char* thread_name) {
     pthread_cond_init(&event_loop->cond, NULL);
 
     event_loop->quit = 0;
+    net_msgx("set epoll as dispatcher, %s", event_loop->thread_name);
     event_loop->event_dispatcher = &epoll_dispatcher;
     event_loop->event_dispatcher_data =
         event_loop->event_dispatcher->init(event_loop);
@@ -51,18 +53,49 @@ int event_loop_run(event_loop_struc* event_loop)
         perror("event loop thread is wrong");
         exit(EXIT_FAILURE);
     }
-    net_msgx("event loop thread is %s",event_loop->thread_name);
+    net_msgx("event loop thread is %s", event_loop->thread_name);
 
     struct timeval time_val;
     time_val.tv_sec = 1;
 
-    while(!event_loop->quit){
-        dispatcher->dispatch(event_loop,&time_val);
+    while (!event_loop->quit) {
+        dispatcher->dispatch(event_loop, &time_val);
 
         event_loop_handle_pending_channel(event_loop);
     }
 
-    net_msgx("event loop thread %s end.",event_loop->thread_name);
+    net_msgx("event loop thread %s end.", event_loop->thread_name);
+
+    return 0;
+}
+
+int channel_event_activate(event_loop_struc* event_loop, int fd, int events)
+{
+    channel_map_struc* map = event_loop->channel_map;
+    net_msgx("activate channel fd==%d, events=%d, thread=%s",
+        fd, events, event_loop->thread_name);
+
+    if (fd < 0) {
+        return 0;
+    }
+    if (fd >= map->n_channel) {
+        return -1;
+    }
+
+    channel_struc* channel = map->channels[fd];
+    assert(fd == channel->fd);
+
+    if (events & (EVENT_READ)) {
+        if (channel->event_read_callback) {
+            channel->event_read_callback(channel->data);
+        }
+    }
+
+    if (events & (EVENT_WRITE)) {
+        if (channel->event_write_callback) {
+            channel->event_write_callback(channel->data);
+        }
+    }
 
     return 0;
 }
@@ -168,6 +201,7 @@ static int event_loop_handle_pending_channel(event_loop_struc* event_loop)
 int event_loop_handle_pending_add(event_loop_struc* event_loop,
     int fd, channel_struc* channel)
 {
+    net_msgx("add channel fd == %d, %s", fd, event_loop->thread_name);
     channel_map_struc* channel_map = event_loop->channel_map;
     if (fd < 0) {
         return 0;
@@ -216,6 +250,7 @@ int event_loop_handle_pending_remove(event_loop_struc* event_loop,
 int event_loop_handle_pending_update(event_loop_struc* event_loop,
     int fd, channel_struc* channel)
 {
+    net_msgx("update channel fd == %d, %s", fd, event_loop->thread_name);
     channel_map_struc* channel_map = event_loop->channel_map;
     if (fd < 0) {
         return 0;
@@ -242,7 +277,30 @@ int event_loop_thread_init(event_loop_thread_struc* event_loop_thread, int i)
     return 0;
 }
 
+void* event_loop_thread_run(void* arg) {
+    event_loop_thread_struc* event_loop_thread = (event_loop_thread_struc*)arg;
+
+    pthread_mutex_lock(&event_loop_thread->mutex);
+
+    event_loop_thread->event_loop = event_loop_init(event_loop_thread->thread_name);
+    net_msgx("event loop thread init and signal, %s", event_loop_thread->thread_name);
+    pthread_cond_signal(&event_loop_thread->cond);
+    pthread_mutex_unlock(&event_loop_thread->mutex);
+
+    event_loop_run(event_loop_thread->event_loop);
+
+    return;
+}
+
 event_loop_struc* event_loop_thread_start(event_loop_thread_struc* event_loop_thread)
 {
-
+    pthread_create(&event_loop_thread->thread_id, NULL,
+        &event_loop_thread_run, event_loop_thread);
+    assert(pthread_mutex_lock(&event_loop_thread->mutex) == 0);
+    while (event_loop_thread->event_loop == NULL) {
+        assert(pthread_cond_wait(&event_loop_thread->cond, &event_loop_thread->mutex) == 0);
+    }
+    assert(pthread_mutex_unlock(&event_loop_thread->mutex) == 0);
+    net_msgx("event loop thread started, %s", event_loop_thread->thread_name);
+    return event_loop_thread->event_loop;
 }

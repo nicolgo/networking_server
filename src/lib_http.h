@@ -58,6 +58,7 @@ typedef struct http_response_struc {
 }http_response_struc;
 
 http_response_struc* http_response_init();
+void http_response_free(http_response_struc* http_response);
 void http_response_encode_buffer(http_response_struc* http_response,
     buffer_struc* output);
 

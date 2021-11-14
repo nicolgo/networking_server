@@ -59,6 +59,9 @@ int event_loop_handle_pending_remove(event_loop_struc* event_loop,
 int event_loop_handle_pending_update(event_loop_struc* event_loop,
     int fd, channel_struc* channel);
 
+int channel_loop_handle_pending_update(event_loop_struc *event_loop,
+int fd,channel_struc* channel);
+
 int event_loop_thread_init(event_loop_thread_struc* event_loop_thread, int i);
 event_loop_struc* event_loop_thread_start(event_loop_thread_struc* event_loop_thread);
 
