@@ -1,6 +1,7 @@
 #include "lib_gutil.h"
 #include "lib_http.h"
 #include "buffer.h"
+#include "lib_tcp_server.h"
 
 /**************************** http request *****************/
 
@@ -129,6 +130,75 @@ void http_response_encode_buffer(http_response_struc* http_response,
 }
 
 /********************* http server  ****************************************/
+
+static int process_status_line(char* start, char* end,
+    http_request_struc* http_request)
+{
+    int size = end - start;
+    //method
+    char *space = memmem(start, end - start, " ", 1);
+    assert(space != NULL);
+    int method_size = space - start;
+    http_request->method = malloc(method_size + 1);
+    strncpy(http_request->method, start, space - start);
+    http_request->method[method_size + 1] = '\0';
+
+    //url
+    start = space + 1;
+    space = memmem(start, end - start, " ", 1);
+    assert(space != NULL);
+    int url_size = space - start;
+    http_request->url = malloc(url_size + 1);
+    strncpy(http_request->url, start, space - start);
+    http_request->url[url_size + 1] = '\0';
+
+    //version
+    start = space + 1;
+    http_request->version = malloc(end - start + 1);
+    strncpy(http_request->version, start, end - start);
+    http_request->version[end - start + 1] = '\0';
+    assert(space != NULL);
+    return size;
+}
+
+static int parse_http_request(buffer_struc* request, http_request_struc* http_request)
+{
+    return 0;
+}
+
+static int http_on_connection_completed(tcp_connection_struc* tcp_connection)
+{
+    net_msgx("connection conpleted");
+    http_request_struc* http_request = http_request_init();
+    tcp_connection->request = http_request;
+    return 0;
+}
+
+static http_on_message(buffer_struc* input, tcp_connection_struc* tcp_connection)
+{
+    net_msgx("message from tcp connection %s", tcp_connection->name);
+    http_request_struc* http_request = (http_request_struc*)tcp_connection->request;
+    http_server_struc* http_server = (http_server_struc*)tcp_connection->data;
+
+    return 0;
+}
+
+static http_on_write_completed(tcp_connection_struc* tcp_connection)
+{
+    net_msgx("write completed");
+    return 0;
+}
+
+static http_on_connect_closed(tcp_connection_struc* tcp_connection)
+{
+    net_msgx("connection closed");
+    if (tcp_connection->request != NULL) {
+        http_request_free(tcp_connection->request);
+        tcp_connection->request = NULL;
+    }
+    return 0;
+}
+
 http_server_struc* http_server_init(event_loop_struc* event_loop,
     int port, request_callback_f request_callback, int thread_num)
 {
@@ -136,11 +206,18 @@ http_server_struc* http_server_init(event_loop_struc* event_loop,
     http_server_struc* http_server = malloc(sizeof(http_server_struc));
     http_server->request_callback = request_callback;
 
+    http_server->tcp_server = tcp_server_init(event_loop, acceptor,
+        http_on_connection_completed,
+        http_on_message,
+        http_on_write_completed,
+        http_on_connect_closed, thread_num);
 
+    http_server->tcp_server->data = http_server;
+
+    return http_server;
 
 }
 void http_server_start(http_server_struc* http_server)
 {
     tcp_server_start(http_server->tcp_server);
 }
-int parse_http_request(buffer_struc* request, http_request_struc* http_request);
