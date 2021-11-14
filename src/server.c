@@ -1,4 +1,6 @@
+#define _GNU_SOURCE
 #include "lib_gutil.h"
+#include <string.h>
 #define PORT 21042
 
 int act_for_request(http_request_struc* http_request,

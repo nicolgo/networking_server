@@ -36,13 +36,17 @@ event_loop_struc* event_loop_init(char* thread_name) {
         perror("socketpair set failed");
     }
 
-    channel = channel_new(event_loop->socker_pair[1], EVENT_READ,
+    channel = channel_init(event_loop->socker_pair[1], EVENT_READ,
         handle_wakeup, NULL, event_loop);
     event_loop_add_channel_event(event_loop, event_loop->socker_pair[1], channel);
 
     return event_loop;
 }
 
+int event_loop_run(event_loop_struc* event_loop)
+{
+    return 0;
+}
 
 void event_loop_wakeup(event_loop_struc* event_loop)
 {

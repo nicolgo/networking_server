@@ -25,7 +25,7 @@ typedef struct channel_struc {
     void* data;//the data for callback
 } channel_struc;
 
-channel_struc* channel_new(int fd, int events, event_read_callback_func event_read_callback,
+channel_struc* channel_init(int fd, int events, event_read_callback_func event_read_callback,
     event_write_callback_func event_write_callback, void* data);
 
 int channel_write_event_is_enabled(channel_struc* channel);

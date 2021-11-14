@@ -4,6 +4,7 @@
 #include "thread_pool.h"
 #include "lib_gutil.h"
 
+
 /*********************** socket acceptor ************************/
 typedef struct socket_acceptor_struct {
     int listen_port;
@@ -12,10 +13,10 @@ typedef struct socket_acceptor_struct {
 socket_acceptor_struct* socket_acceptor_init(int port);
 
 /********************** tcp connection *************************/
-typedef int (*connection_completed_callback_f)(tcp_connection_struc* tcp_connection);
-typedef int (*message_callback_f)(buffer_struc* buffer, tcp_connection_struc* tcp_connection);
-typedef int (*write_completed_callback_f)(tcp_connection_struc* tcp_connection);
-typedef int (*connection_closed_callback_f)(tcp_connection_struc* tcp_connection);
+typedef int (*connection_completed_callback_f)(struct tcp_connection_struc* tcp_connection);
+typedef int (*message_callback_f)(buffer_struc* buffer, struct tcp_connection_struc* tcp_connection);
+typedef int (*write_completed_callback_f)(struct tcp_connection_struc* tcp_connection);
+typedef int (*connection_closed_callback_f)(struct tcp_connection_struc* tcp_connection);
 
 typedef struct tcp_connection_struc {
     char* name;
@@ -34,10 +35,10 @@ typedef struct tcp_connection_struc {
     connection_closed_callback_f on_connection_closed;
 }tcp_connection_struc;
 
-tcp_connection_struc* tcp_connection_init(int fd, event_loop_struc* event_loop,
+tcp_connection_struc* tcp_connection_init(int connected_fd, event_loop_struc* event_loop,
     connection_completed_callback_f on_connection_completed,
     connection_closed_callback_f on_connection_closed,
-    message_callback_f on_message, 
+    message_callback_f on_message,
     write_completed_callback_f on_write_completed);
 
 int tcp_connection_send_data(tcp_connection_struc* tcp_connection, void* data, int size);

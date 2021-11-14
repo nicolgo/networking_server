@@ -116,7 +116,7 @@ tcp_connection_struc* tcp_connection_init(int connected_fd, event_loop_struc* ev
     tcp_connection->out_buffer = buffer_new();
 
     char buf[16] = { 0 };
-    sprint(buf, "connection-%d\0", connected_fd);
+    sprintf(buf, "connection-%d\0", connected_fd);
     tcp_connection->name = buf;
 
     channel_struc* channel = channel_init(connected_fd, EVENT_READ,

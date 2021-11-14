@@ -1,6 +1,7 @@
 #ifndef LIB_GUTIL_H
 #define LIB_GUTIL_H
 
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
