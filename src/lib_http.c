@@ -136,7 +136,7 @@ static int process_status_line(char* start, char* end,
 {
     int size = end - start;
     //method
-    char *space = memmem(start, end - start, " ", 1);
+    char* space = memmem(start, end - start, " ", 1);
     assert(space != NULL);
     int method_size = space - start;
     http_request->method = malloc(method_size + 1);
@@ -163,15 +163,48 @@ static int process_status_line(char* start, char* end,
 
 static int parse_http_request(buffer_struc* request, http_request_struc* http_request)
 {
-    return 0;
-}
+    int ok = 1;
+    while (http_request->current_state != REQUEST_DONE) {
+        if (http_request->current_state == REQUEST_STATUS) {
+            char* crlf = buffer_find_CRLF(request);
+            if (crlf) {
+                int request_line_size = process_status_line(request->data
+                    + request->read_index, crlf, http_request);
+                if (request_line_size) {
+                    request->read_index += request_line_size;
+                    request->read_index += 2;
+                    // change the state
+                    http_request->current_state = REQUEST_HEADERS;
+                }
+            }
+        }
+        else if (http_request->current_state == REQUEST_HEADERS) {
+            char* crlf = buffer_find_CRLF(request);
+            if (crlf) {
+                char *start = request->data + request->read_index;
+                int request_line_size = crlf - start;
+                char *colon = memmem(start, request_line_size, ": ", 2);
+                if (colon != NULL) {
+                    char *key = malloc(colon - start + 1);
+                    strncpy(key, start, colon - start);
+                    key[colon - start] = '\0';
+                    char *value = malloc(crlf - colon - 2 + 1);
+                    strncpy(value, colon + 2, crlf - colon - 2);
+                    value[crlf - colon - 2] = '\0';
 
-static int http_on_connection_completed(tcp_connection_struc* tcp_connection)
-{
-    net_msgx("connection conpleted");
-    http_request_struc* http_request = http_request_init();
-    tcp_connection->request = http_request;
-    return 0;
+                    http_request_add_header(http_request, key, value);
+
+                    request->read_index += request_line_size; //request line size
+                    request->read_index += 2;  //CRLF size
+                } else {
+                    //The last line.
+                    request->read_index += 2;  //CRLF size
+                    http_request->current_state = REQUEST_DONE;
+                }
+            }
+        }
+    }
+    return ok;
 }
 
 static http_on_message(buffer_struc* input, tcp_connection_struc* tcp_connection)
@@ -180,6 +213,36 @@ static http_on_message(buffer_struc* input, tcp_connection_struc* tcp_connection
     http_request_struc* http_request = (http_request_struc*)tcp_connection->request;
     http_server_struc* http_server = (http_server_struc*)tcp_connection->data;
 
+    if (parse_http_request(input, http_request) == 0) {
+        char* error_response = "HTTP/1.1 400 Bad Request\r\n\r\n";
+        tcp_connection_send_data(tcp_connection, error_response, sizeof(error_response));
+        tcp_connection_shutdown(tcp_connection);
+    }
+
+    if (http_request_current_state(http_request) == REQUEST_DONE) {
+        http_response_struc* http_response = http_response_init();
+        if (http_server->request_callback != NULL) {
+            http_server->request_callback(http_request, http_response);
+        }
+
+        buffer_struc* buffer = buffer_new();
+        http_response_encode_buffer(http_response, buffer);
+        tcp_connection_send_buffer(tcp_connection, buffer);
+
+        if (http_request_close_connection(http_request)) {
+            tcp_connection_shutdown(tcp_connection);
+        }
+        http_request_reset(http_request);
+    }
+
+    return 0;
+}
+
+static int http_on_connection_completed(tcp_connection_struc* tcp_connection)
+{
+    net_msgx("connection conpleted");
+    http_request_struc* http_request = http_request_init();
+    tcp_connection->request = http_request;
     return 0;
 }
 
