@@ -161,7 +161,7 @@ static int process_status_line(char* start, char* end,
     return size;
 }
 
-static int parse_http_request(buffer_struc* request, http_request_struc* http_request)
+int parse_http_request(buffer_struc* request, http_request_struc* http_request)
 {
     int ok = 1;
     while (http_request->current_state != REQUEST_DONE) {
