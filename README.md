@@ -11,3 +11,7 @@ a project of networking protocol
 1. check if system open dump core function by `ulimit -c`.
 2. if the output is 0, using `ulimit -c unlimited`
 3. install `coredumpctl` tool, the core dump file will in `/var/lib/systemd/coredump/`
+4. examine the backtrace using gdb
+ `#coredumpctl gdb app_name`  
+ `(gdb) bt`  
+  details can be seen in this [wiki](https://wiki.archlinux.org/title/Core_dump)
