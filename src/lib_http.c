@@ -178,6 +178,7 @@ static int process_status_line(char* start, char* end,
 int parse_http_request(buffer_struc* request, http_request_struc* http_request)
 {
     int ok = 1;
+    printf("%s",request->data);
     while (http_request->current_state != REQUEST_DONE) {
         if (http_request->current_state == REQUEST_STATUS) {
             char* crlf = buffer_find_CRLF(request);

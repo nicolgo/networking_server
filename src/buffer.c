@@ -96,7 +96,7 @@ int buffer_socket_read(buffer_struc* buffer, int fd)
     struct iovec vec[2];
     int max_writable = buffer_writeable_size(buffer);
     vec[0].iov_base = buffer->data + buffer->write_index;
-    vec[1].iov_len = max_writable;
+    vec[0].iov_len = max_writable;
     vec[1].iov_base = tmp_buffer;
     vec[1].iov_len = sizeof(tmp_buffer);
     int result = readv(fd, vec, 2);
