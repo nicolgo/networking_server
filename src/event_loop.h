@@ -16,18 +16,20 @@ typedef struct channel_elem_struc {
 
 typedef struct event_loop_struc {
     int quit;
-    struct event_dispatcher_struc* event_dispatcher;
-    void* event_dispatcher_data;// void* type can be transfered easily.
-    channel_map_struc* channel_map;
-
-    int is_handle_pending;
-    channel_elem_struc* pending_head;
-    channel_elem_struc* pending_tail;
-
+    char* thread_name;
     pthread_t owner_thread_id;
     pthread_mutex_t mutex;
     pthread_cond_t cond;
-    char* thread_name;
+
+    struct event_dispatcher_struc* event_dispatcher;
+    void* event_dispatcher_data;// epoll or poll.
+    channel_map_struc* channel_map;
+
+    int is_handle_pending;
+    // the event of child thread from head to tail
+    channel_elem_struc* pending_head;
+    channel_elem_struc* pending_tail;
+
     int socker_pair[2];
 } event_loop_struc;
 

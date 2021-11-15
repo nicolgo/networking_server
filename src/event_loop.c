@@ -13,19 +13,7 @@ event_loop_struc* event_loop_init(char* thread_name) {
     event_loop_struc* event_loop = malloc(sizeof(event_loop_struc));
     pthread_mutex_init(&event_loop->mutex, NULL);
     pthread_cond_init(&event_loop->cond, NULL);
-
-    event_loop->quit = 0;
-    net_msgx("set epoll as dispatcher, %s", event_loop->thread_name);
-    event_loop->event_dispatcher = &epoll_dispatcher;
-    event_loop->event_dispatcher_data =
-        event_loop->event_dispatcher->init(event_loop);
-    event_loop->channel_map = malloc(sizeof(channel_map_struc));
-    map_init(event_loop->channel_map);
-
-    event_loop->is_handle_pending = 0;
-    event_loop->pending_head = NULL;
-    event_loop->pending_tail = NULL;
-
+    // set thread name.
     event_loop->owner_thread_id = pthread_self();
     if (thread_name != NULL) {
         event_loop->thread_name = thread_name;
@@ -33,6 +21,19 @@ event_loop_struc* event_loop_init(char* thread_name) {
     else {
         event_loop->thread_name = "main thread";
     }
+
+    event_loop->quit = 0;
+    net_msgx("set epoll as dispatcher, %s", event_loop->thread_name);
+    event_loop->event_dispatcher = &epoll_dispatcher;
+    event_loop->event_dispatcher_data =
+        event_loop->event_dispatcher->init(event_loop);
+
+    event_loop->channel_map = malloc(sizeof(channel_map_struc));
+    map_init(event_loop->channel_map);
+
+    event_loop->is_handle_pending = 0;
+    event_loop->pending_head = NULL;
+    event_loop->pending_tail = NULL;
 
     if (socketpair(AF_UNIX, SOCK_STREAM, 0, event_loop->socker_pair) < 0) {
         perror("socketpair set failed");
@@ -59,8 +60,9 @@ int event_loop_run(event_loop_struc* event_loop)
     time_val.tv_sec = 1;
 
     while (!event_loop->quit) {
+        // block here to wait I/O event, and get active channel.
         dispatcher->dispatch(event_loop, &time_val);
-
+        // handle the pending channel.
         event_loop_handle_pending_channel(event_loop);
     }
 
@@ -134,6 +136,7 @@ static void event_loop_channel_buffer_noblock(event_loop_struc* event_loop,
     }
 }
 
+/****************** add/delete/update channel event ***********************/
 int event_loop_process_channel_event(event_loop_struc* event_loop,
     int fd, channel_struc* channel, int type)
 {
@@ -165,6 +168,7 @@ int event_loop_update_channel_event(event_loop_struc* event_loop,
     return event_loop_process_channel_event(event_loop, fd, channel, 3);
 }
 
+/****************** implemetation of channel ***********************/
 static int event_loop_handle_pending_channel(event_loop_struc* event_loop)
 {
     channel_elem_struc* channel_elem;
@@ -207,11 +211,12 @@ int event_loop_handle_pending_add(event_loop_struc* event_loop,
         return 0;
     }
     if (fd >= channel_map->n_channel) {
-        if (map_make_space(channel_map, fd, sizeof(channel_struc*)) == -1) {
+        if (map_expand_space(channel_map, fd, sizeof(channel_struc*)) == -1) {
+            perror("failed to expand the map table");
             return -1;
         }
     }
-
+    // add a key-channel pair.
     if (channel_map->channels[fd] == NULL) {
         event_dispatcher_struc* event_dispatcher = event_loop->event_dispatcher;
         channel_map->channels[fd] = channel;
@@ -246,7 +251,6 @@ int event_loop_handle_pending_remove(event_loop_struc* event_loop,
     channel_map->channels[fd] = NULL;
     return return_value;
 }
-
 int event_loop_handle_pending_update(event_loop_struc* event_loop,
     int fd, channel_struc* channel)
 {
@@ -262,6 +266,8 @@ int event_loop_handle_pending_update(event_loop_struc* event_loop,
     return 0;
 }
 
+
+/******************** event loop thread **********************************/
 int event_loop_thread_init(event_loop_thread_struc* event_loop_thread, int i)
 {
     char buf[16] = { 0 };

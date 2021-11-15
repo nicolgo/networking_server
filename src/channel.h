@@ -22,7 +22,7 @@ typedef struct channel_struc {
 
     event_write_callback_func event_write_callback;
     event_read_callback_func event_read_callback;
-    void* data;//the data for callback
+    void* data;//the data for callback function,event loop/tcp_server/tcp_connection
 } channel_struc;
 
 channel_struc* channel_init(int fd, int events, event_read_callback_func event_read_callback,
@@ -32,13 +32,16 @@ int channel_write_event_is_enabled(channel_struc* channel);
 int channel_write_event_enable(channel_struc* channel);
 int channel_write_event_disable(channel_struc* channel);
 
-/* The index of channel map is socket descriptor.*/
+
+/********************** channel map ***************************/
+/* The index of channel map is socket descriptor. when event happen, 
+get socket fd -> get channel -> get read/write callback function.*/
 typedef struct channel_map_struc {
     void** channels;//the address of channel object
     int n_channel;
 }channel_map_struc;
 
-int map_make_space(channel_map_struc* map, int socket_fd, int msize);
+int map_expand_space(channel_map_struc* map, int socket_fd, int msize);
 void map_init(channel_map_struc* map);
 void map_free(channel_map_struc* map);
 

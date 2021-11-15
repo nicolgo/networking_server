@@ -30,7 +30,9 @@ int channel_write_event_disable(channel_struc* channel)
     event_loop_update_channel_event(event_loop, channel->fd, channel);
 }
 
-int map_make_space(channel_map_struc* map, int socket_fd, int msize)
+
+/********************  channel map ***********************************/
+int map_expand_space(channel_map_struc* map, int socket_fd, int msize)
 {
     if (map->n_channel <= socket_fd) {
         int n_entries = map->n_channel ? map->n_channel : 32;

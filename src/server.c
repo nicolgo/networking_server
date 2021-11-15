@@ -69,9 +69,9 @@ int test_http_server()
 int main(int c, char* argv[])
 {
 
-    test_http_server();
-
-    event_loop_struc* event_loop = event_loop_init(NULL);
+    //test_http_server();
+    char *thread_name = NULL;
+    event_loop_struc* event_loop = event_loop_init(thread_name);
 
     http_server_struc* http_server = http_server_init(event_loop, PORT, handle_request, 2);
     http_server_start(http_server);
