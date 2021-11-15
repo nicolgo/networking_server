@@ -27,6 +27,7 @@ void net_log(log_level_enum level, const char* msg)
 
 void net_logx(log_level_enum level, const char* errstr, const char* fmt, va_list ap)
 {
+#if LOG_FLAG
     char buf[1024];
     size_t len;
 
@@ -43,18 +44,23 @@ void net_logx(log_level_enum level, const char* errstr, const char* fmt, va_list
     }
 
     net_log(level, buf);
+#endif
 }
 void net_msgx(const char* fmt, ...)
 {
+#if LOG_FLAG
     va_list ap;
     va_start(ap, fmt);
     net_logx(LOG_LEVEL_MSG, NULL, fmt, ap);
     va_end(ap);
+#endif
 }
 void net_debugx(const char* fmt, ...)
 {
+#if LOG_FLAG
     va_list ap;
     va_start(ap, fmt);
     net_logx(LOG_LEVEL_DEBUG, NULL, fmt, ap);
     va_end(ap);
+#endif
 }

@@ -1,6 +1,8 @@
 #ifndef LIB_LOG_H
 #define LIB_LOG_H
 
+#define LOG_FLAG 0
+
 typedef enum log_level_enum{
     LOG_LEVEL_DEBUG,
     LOG_LEVEL_MSG,
