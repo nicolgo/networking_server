@@ -18,7 +18,6 @@ int buffer_readable_size(buffer_struc *buffer);
 int buffer_front_spare_size(buffer_struc *buffer);
 
 int buffer_append(buffer_struc *buffer,void *data,int size);
-int buffer_append_char(buffer_struc* buffer,char c);
 int buffer_append_string(buffer_struc *buffer,char *data);
 int buffer_socket_read(buffer_struc *buffer,int fd);
 char buffer_read_char(buffer_struc *buffer);

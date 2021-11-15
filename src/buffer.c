@@ -40,7 +40,7 @@ int buffer_front_spare_size(buffer_struc* buffer)
     return buffer->read_index;
 }
 
-void make_space(buffer_struc* buffer, int size)
+void expand_space(buffer_struc* buffer, int size)
 {
     if (buffer_writeable_size(buffer) >= size) {
         return;
@@ -70,17 +70,10 @@ void make_space(buffer_struc* buffer, int size)
 int buffer_append(buffer_struc* buffer, void* data, int size)
 {
     if (data != NULL) {
-        make_space(buffer, size);
+        expand_space(buffer, size);
         memcpy(buffer->data + buffer->write_index, data, size);
         buffer->write_index += size;
     }
-}
-
-int buffer_append_char(buffer_struc* buffer,char c)
-{
-    make_space(buffer,1);
-    buffer->data[buffer->write_index++] = c;
-    return 0;
 }
 
 int buffer_append_string(buffer_struc* buffer, char* data)
