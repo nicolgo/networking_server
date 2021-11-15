@@ -7,7 +7,7 @@ static int epoll_update(event_loop_struc* event_loop, channel_struc* channel);
 static int epoll_dispatch(event_loop_struc* event_loop, struct timeval* time_val);
 static void epoll_clear(event_loop_struc* event_loop);
 
-const struct event_dispatcher_struc epoll_dispatcher = {
+struct event_dispatcher_struc epoll_dispatcher = {
     "epoll",
     epoll_init,
     epoll_add,

@@ -66,7 +66,7 @@ int test_http_server()
     return 0;
 }
 
-int main(int c, char* argv[])
+int main(void)
 {
 
     //test_http_server();

@@ -13,12 +13,13 @@ typedef struct socket_acceptor_struct {
 socket_acceptor_struct* socket_acceptor_init(int port);
 
 /********************** tcp connection *************************/
-typedef int (*connection_completed_callback_f)(struct tcp_connection_struc* tcp_connection);
-typedef int (*message_callback_f)(buffer_struc* buffer, struct tcp_connection_struc* tcp_connection);
-typedef int (*write_completed_callback_f)(struct tcp_connection_struc* tcp_connection);
-typedef int (*connection_closed_callback_f)(struct tcp_connection_struc* tcp_connection);
+typedef struct tcp_connection_struc tcp_connection_struc;
+typedef int (*connection_completed_callback_f)(tcp_connection_struc* tcp_connection);
+typedef int (*message_callback_f)(buffer_struc* buffer, tcp_connection_struc* tcp_connection);
+typedef int (*write_completed_callback_f)(tcp_connection_struc* tcp_connection);
+typedef int (*connection_closed_callback_f)(tcp_connection_struc* tcp_connection);
 
-typedef struct tcp_connection_struc {
+struct tcp_connection_struc {
     char* name;
     event_loop_struc* event_loop;
     channel_struc* channel;
@@ -33,7 +34,7 @@ typedef struct tcp_connection_struc {
     message_callback_f on_message;
     write_completed_callback_f on_write_completed;
     connection_closed_callback_f on_connection_closed;
-}tcp_connection_struc;
+};
 
 tcp_connection_struc* tcp_connection_init(int connected_fd, event_loop_struc* event_loop,
     connection_completed_callback_f on_connection_completed,

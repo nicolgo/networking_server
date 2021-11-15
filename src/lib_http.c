@@ -222,7 +222,7 @@ int parse_http_request(buffer_struc* request, http_request_struc* http_request)
     return ok;
 }
 
-static http_on_message(buffer_struc* input, tcp_connection_struc* tcp_connection)
+static int http_on_message(buffer_struc* input, tcp_connection_struc* tcp_connection)
 {
     net_msgx("message from tcp connection %s", tcp_connection->name);
     http_request_struc* http_request = (http_request_struc*)tcp_connection->request;
@@ -261,13 +261,13 @@ static int http_on_connection_completed(tcp_connection_struc* tcp_connection)
     return 0;
 }
 
-static http_on_write_completed(tcp_connection_struc* tcp_connection)
+static int http_on_write_completed(tcp_connection_struc* tcp_connection)
 {
     net_msgx("write completed");
     return 0;
 }
 
-static http_on_connect_closed(tcp_connection_struc* tcp_connection)
+static int http_on_connect_closed(tcp_connection_struc* tcp_connection)
 {
     net_msgx("connection closed");
     if (tcp_connection->request != NULL) {

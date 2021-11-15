@@ -5,7 +5,7 @@
 
 #define MAXEVENTS 128
 
-extern const struct event_dispatcher_struc epoll_dispatcher;
+extern struct event_dispatcher_struc epoll_dispatcher;
 
 typedef struct event_dispatcher_struc {
     const char* name;

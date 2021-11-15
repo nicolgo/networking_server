@@ -22,12 +22,16 @@ int channel_write_event_enable(channel_struc* channel)
     event_loop_struc* event_loop = (event_loop_struc*)channel->data;
     channel->events = channel->events | EVENT_WRITE;
     event_loop_update_channel_event(event_loop, channel->fd, channel);
+
+    return 0;
 }
 int channel_write_event_disable(channel_struc* channel)
 {
     event_loop_struc* event_loop = (event_loop_struc*)channel->data;
     channel->events = channel->events | (~EVENT_WRITE);
     event_loop_update_channel_event(event_loop, channel->fd, channel);
+
+    return 0;
 }
 
 

@@ -7,6 +7,7 @@ static int event_loop_process_channel_event(event_loop_struc* event_loop,
     int fd, channel_struc* channel, int type);
 static int event_loop_handle_pending_channel(event_loop_struc* event_loop);
 static int handle_wakeup(void* data);
+static void* event_loop_thread_run(void* arg);
 
 event_loop_struc* event_loop_init(char* thread_name) {
     channel_struc* channel;
@@ -275,7 +276,7 @@ int event_loop_thread_init(event_loop_thread_struc* event_loop_thread, int i)
     pthread_mutex_init(&event_loop_thread->mutex, NULL);
     pthread_cond_init(&event_loop_thread->cond, NULL);
 
-    sprintf(buf, "Thread %d\0", i + 1);
+    sprintf(buf, "Thread %d%c", i + 1,'\0');
     event_loop_thread->thread_name = buf;
     event_loop_thread->event_loop = NULL;
     event_loop_thread->thread_count = 0;
@@ -284,7 +285,7 @@ int event_loop_thread_init(event_loop_thread_struc* event_loop_thread, int i)
     return 0;
 }
 
-void* event_loop_thread_run(void* arg) {
+static void* event_loop_thread_run(void* arg) {
     event_loop_thread_struc* event_loop_thread = (event_loop_thread_struc*)arg;
 
     pthread_mutex_lock(&event_loop_thread->mutex);
@@ -295,8 +296,6 @@ void* event_loop_thread_run(void* arg) {
     pthread_mutex_unlock(&event_loop_thread->mutex);
 
     event_loop_run(event_loop_thread->event_loop);
-
-    return;
 }
 
 event_loop_struc* event_loop_thread_start(event_loop_thread_struc* event_loop_thread)

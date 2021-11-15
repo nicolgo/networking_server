@@ -122,7 +122,7 @@ tcp_connection_struc* tcp_connection_init(int connected_fd, event_loop_struc* ev
     tcp_connection->out_buffer = buffer_new();
 
     char buf[16] = { 0 };
-    sprintf(buf, "connection-%d\0", connected_fd);
+    sprintf(buf, "connection-%d%c", connected_fd,'\0');
     tcp_connection->name = buf;
 
     channel_struc* channel = channel_init(connected_fd, EVENT_READ,
@@ -141,8 +141,8 @@ tcp_connection_struc* tcp_connection_init(int connected_fd, event_loop_struc* ev
 
 int tcp_connection_send_data(tcp_connection_struc* tcp_connection, void* data, int size)
 {
-    size_t n_writed = 0;
-    size_t n_left = size;
+    ssize_t n_writed = 0;
+    ssize_t n_left = size;
     int fault = 0;
     channel_struc* channel = tcp_connection->channel;
     buffer_struc* output_buffer = tcp_connection->out_buffer;

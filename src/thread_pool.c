@@ -14,11 +14,10 @@ thread_pool_struc* thread_pool_init(event_loop_struc *main_loop, int thread_numb
 
 void thread_pool_start(thread_pool_struc* thread_pool)
 {
-    void *tmp;
     thread_pool->started = 1;
 
     if(thread_pool->thread_number <= 0){
-        return 0;
+        return;
     }
 
     thread_pool->event_loop_threads = malloc(thread_pool->thread_number*sizeof(event_loop_thread_struc));

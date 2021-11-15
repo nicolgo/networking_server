@@ -5,7 +5,7 @@
 #include "lib_gutil.h"
 #include <pthread.h>
 
-extern const struct event_dispatcher_struc epoll_dispatcher;
+extern struct event_dispatcher_struc epoll_dispatcher;
 
 /* a linked list of channel*/
 typedef struct channel_elem_struc {
