@@ -56,10 +56,10 @@ socket_acceptor_struct* socket_acceptor_init(int port) {
 
 int handle_connection_closed(tcp_connection_struc* tcp_connection)
 {
-    event_loop_struc *event_loop = tcp_connection->event_loop;
-    channel_struc *channel = tcp_connection->channel;
-    event_loop_remove_channel_event(event_loop,channel->fd,channel);
-    if(tcp_connection->on_connection_closed != NULL){
+    event_loop_struc* event_loop = tcp_connection->event_loop;
+    channel_struc* channel = tcp_connection->channel;
+    event_loop_remove_channel_event(event_loop, channel->fd, channel);
+    if (tcp_connection->on_connection_closed != NULL) {
         tcp_connection->on_connection_closed(tcp_connection);
     }
     return 0;
@@ -231,6 +231,16 @@ int handle_connection_established(void* data)
 
     event_loop_struc* event_loop = thread_pool_get_loop(tcp_server->thread_pool);
 
+    //create a new tcp connection
+    tcp_connection_struc* tcp_connection = tcp_connection_init(connected_fd,
+        event_loop, tcp_server->connection_completed_callback,
+        tcp_server->connection_closed_callback,
+        tcp_server->message_callback,
+        tcp_server->write_completed_callback);
+
+    if(tcp_server->data != NULL){
+        tcp_connection->data = tcp_server->data;
+    }
 
     return 0;
 }

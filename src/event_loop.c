@@ -270,7 +270,8 @@ int event_loop_handle_pending_update(event_loop_struc* event_loop,
 /******************** event loop thread **********************************/
 int event_loop_thread_init(event_loop_thread_struc* event_loop_thread, int i)
 {
-    char buf[16] = { 0 };
+    
+    char *buf = malloc(10);
     pthread_mutex_init(&event_loop_thread->mutex, NULL);
     pthread_cond_init(&event_loop_thread->cond, NULL);
 
