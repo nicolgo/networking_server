@@ -6,6 +6,7 @@
 #include <pthread.h>
 
 extern struct event_dispatcher_struc epoll_dispatcher;
+extern struct event_dispatcher_struc poll_dispatcher;
 
 /* a linked list of channel*/
 typedef struct channel_elem_struc {

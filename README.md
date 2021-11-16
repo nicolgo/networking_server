@@ -1,7 +1,7 @@
 # networking_server
 a project of networking protocol
 ## Test steps
-`ab -n 10000 -c -k 100 http://127.0.0.1:21042/`
+`ab -n 10000 -c 100 -k http://127.0.0.1:21042/`
 
 ## Some Notes
 1. using gdb debug the child process: `-exec set follow-fork-mode child`

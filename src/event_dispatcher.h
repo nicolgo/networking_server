@@ -2,10 +2,13 @@
 #define EVENT_DISPATCHER_H
 #include "event_loop.h"
 #include "lib_gutil.h"
+#include <poll.h>
 
 #define MAXEVENTS 128
+#define POLL_MAX_SIZE 1024
 
 extern struct event_dispatcher_struc epoll_dispatcher;
+extern struct event_dispatcher_struc poll_dispatcher;
 
 typedef struct event_dispatcher_struc {
     const char* name;
@@ -33,7 +36,13 @@ typedef struct epoll_dispatcher_data_struc {
     struct epoll_event* events;
 }epoll_dispatcher_data_struc;
 
-
+typedef struct poll_dispatcher_data_struc{
+    int event_count;
+    int nfds;
+    int realloc_copy;
+    struct pollfd* event_set;
+    struct pollfd* event_set_copy;
+}poll_dispatcher_data_struc;
 
 
 #endif
