@@ -25,7 +25,7 @@ event_loop_struc* event_loop_init(char* thread_name) {
 
     event_loop->quit = 0;
     net_msgx("set epoll as dispatcher, %s", event_loop->thread_name);
-#if 0
+#if 1
     event_loop->event_dispatcher = &epoll_dispatcher;
 #else
     event_loop->event_dispatcher = &poll_dispatcher;

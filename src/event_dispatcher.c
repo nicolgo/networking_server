@@ -225,7 +225,6 @@ static int poll_update(event_loop_struc* event_loop, channel_struc* channel)
         events = events | POLLWRNORM;
     }
 
-    //找到fd对应的记录
     int i = 0;
     for (i = 0; i < POLL_MAX_SIZE; i++) {
         if (poll_dispatcher_data->event_set[i].fd == fd) {
@@ -235,7 +234,7 @@ static int poll_update(event_loop_struc* event_loop, channel_struc* channel)
     }
 
     net_msgx("poll updated channel fd==%d, %s", fd, event_loop->thread_name);
-    if (i >= poll_dispatcher_data) {
+    if (i >= POLL_MAX_SIZE) {
         LOG_ERROR("can not find fd, poll updated error");
     }
 

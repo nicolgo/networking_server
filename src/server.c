@@ -21,8 +21,7 @@ int handle_request(http_request_struc* http_request,
         http_response->status_code = OK;
         http_response->status_message = "OK";
         http_response->content_type = "text/html";
-        http_response->body = "<html><head><title> \
-        COMP 5311</title></head><body><h1>Internet Infrastructure and Protocols</h1></body></html>";
+        http_response->body = "<html><head><title>COMP 5311</title></head><body><h1>Internet Infrastructure and Protocols</h1></body></html>";
     }
     else if (strcmp(path, "/network") == 0) {
         http_response->status_code = OK;

@@ -1,4 +1,4 @@
-TARGET=my_app
+TARGET=http_server
 
 SRCS = $(wildcard *.c)
 
