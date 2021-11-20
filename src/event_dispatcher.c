@@ -73,6 +73,7 @@ static int epoll_action(event_loop_struc* event_loop,
         events = events | EPOLLOUT;
     }
     event.events = events;
+    //event.events = events | EPOLLET;
     if (epoll_ctl(epoll_dispatcher_data->efd, action, fd, &event) == -1) {
         perror("epoll_ctl operate fd failed");
     }

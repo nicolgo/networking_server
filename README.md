@@ -8,10 +8,11 @@ a project of networking protocol
 - `tutorial` - some test code.
 
 ## Test steps
-1. change the location to ./src dirtory.
-2. using `make` to compile the code, then you will get an executable file
-3. run the executable file, it will run the sercer in `localhost:21042`
-4. open a new terminal window, using ab tool with `ab -n 10000 -c 100 -k http://127.0.0.1:21042/` command to test.
+1. change the location to `./src` dirtory.
+2. using epoll dispatcher, make sure the event_loop->event_dispatcher in the `event_loop.c` equal to `&epoll_dispatcher`; using poll dispatcher, change the value to `&poll_dispatcher`.
+3. using `make` to compile the code, then you will get an executable file
+4. run the executable file, it will run the sercer in `localhost:21042`
+5. open a new terminal window, using ab tool with `ab -n 10000 -c 100 -k http://127.0.0.1:21042/` command to test.
 
 ## Some Notes
 1. using gdb debug the child process: `-exec set follow-fork-mode child`
