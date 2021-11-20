@@ -1,7 +1,17 @@
 # networking_server
 a project of networking protocol
+
+## File structure
+- `src`: all the code of the Http server, which include a Makefile and source code.
+- `pre`: The study code, some test code of socket interfaces like select,poll, epoll and so on.
+- `bgnet_examples` - the code of [`Beej's Guide to Network Programming`](https://beej.us/guide/bgnet/html/)
+- `tutorial` - some test code.
+
 ## Test steps
-`ab -n 10000 -c 100 -k http://127.0.0.1:21042/`
+1. change the location to ./src dirtory.
+2. using `make` to compile the code, then you will get an executable file
+3. run the executable file, it will run the sercer in `localhost:21042`
+4. open a new terminal window, using ab tool with `ab -n 10000 -c 100 -k http://127.0.0.1:21042/` command to test.
 
 ## Some Notes
 1. using gdb debug the child process: `-exec set follow-fork-mode child`

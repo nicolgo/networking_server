@@ -72,7 +72,7 @@ int main(void)
     char *thread_name = NULL;
     event_loop_struc* event_loop = event_loop_init(thread_name);
 
-    http_server_struc* http_server = http_server_init(event_loop, PORT, handle_request, 2);
+    http_server_struc* http_server = http_server_init(event_loop, PORT, handle_request, 0);
     http_server_start(http_server);
 
     event_loop_run(event_loop);
